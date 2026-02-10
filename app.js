@@ -329,10 +329,10 @@ const adminUserBody = document.getElementById('admin-user-body');
 
 if (adminDashBtn) {
     adminDashBtn.addEventListener('click', () => {
+        console.log('Admin Dashboard Opening...');
         renderAdminDashboard();
         adminModal.classList.add('active');
 
-        // Link the dashboard internal import button if it exists
         const dashImport = document.getElementById('admin-import-trigger');
         if (dashImport) dashImport.onclick = () => document.getElementById('import-file').click();
     });
