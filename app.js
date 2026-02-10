@@ -334,25 +334,50 @@ if (adminDashBtn) {
 }
 
 function renderAdminDashboard() {
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    adminUserBody.innerHTML = '';
+    const targetBody = document.getElementById('admin-user-body');
+    if (!targetBody) {
+        console.error('Admin user body not found!');
+        return;
+    }
+
+    let users = [];
+    try {
+        const rawUsers = localStorage.getItem('users');
+        if (rawUsers) {
+            users = JSON.parse(rawUsers);
+            if (!Array.isArray(users)) users = [];
+        }
+    } catch (e) {
+        console.error('Error parsing users for dashboard:', e);
+        users = [];
+    }
+
+    targetBody.innerHTML = '';
 
     if (users.length === 0) {
-        adminUserBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No users found in database.</td></tr>';
+        targetBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No users found in database.</td></tr>';
         return;
     }
 
     // Sort to keep Admin at top
-    users.sort((a, b) => (a.username.toLowerCase() === 'admin_00' ? -1 : 1));
+    users.sort((a, b) => {
+        const nameA = (a.username || '').toLowerCase();
+        const nameB = (b.username || '').toLowerCase();
+        if (nameA === 'admin_00') return -1;
+        if (nameB === 'admin_00') return 1;
+        return 0;
+    });
+
+    console.log(`Rendering ${users.length} users in dashboard.`);
 
     users.forEach(user => {
         const tr = document.createElement('tr');
-        const isSelf = user.username.toLowerCase() === 'admin_00';
+        const isSelf = (user.username || '').toLowerCase() === 'admin_00';
 
         tr.innerHTML = `
-            <td><strong>${user.username}</strong> ${isSelf ? '<span class="badge badge-low">Admin</span>' : ''}</td>
-            <td>${user.email}</td>
-            <td><span class="credential-field">${user.password}</span></td>
+            <td><strong>${user.username || 'Unknown'}</strong> ${isSelf ? '<span class="badge badge-low">Admin</span>' : ''}</td>
+            <td>${user.email || 'No email'}</td>
+            <td><span class="credential-field">${user.password || '******'}</span></td>
             <td>
                 ${!isSelf ? `
                     <button class="btn-icon btn-delete" onclick="deleteSpecificUser('${user.username}')" title="Delete User">
@@ -361,7 +386,7 @@ function renderAdminDashboard() {
                 ` : '<span class="text-muted">Protected</span>'}
             </td>
         `;
-        adminUserBody.appendChild(tr);
+        targetBody.appendChild(tr);
     });
 }
 

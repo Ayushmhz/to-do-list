@@ -50,7 +50,7 @@ function initializeDefaultAdmin() {
             users.push({
                 username: 'Admin_00',
                 email: 'admin@system.com',
-                password: 'admin123'
+                password: 'admin'
             });
             localStorage.setItem('users', JSON.stringify(users));
             console.log('Default admin initialized.');
@@ -59,7 +59,7 @@ function initializeDefaultAdmin() {
         console.error('Admin Init Error:', e);
         // Fallback to fresh list with only admin
         localStorage.setItem('users', JSON.stringify([{
-            username: 'Admin_00', email: 'admin@system.com', password: 'admin123'
+            username: 'Admin_00', email: 'admin@system.com', password: 'admin'
         }]));
     }
 }
