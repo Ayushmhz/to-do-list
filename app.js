@@ -156,6 +156,7 @@ function saveTasks() {
 function loadTasks() {
     const user = JSON.parse(localStorage.getItem('currentUser'));
     if (!user) return;
+
     const saved = localStorage.getItem(`tasks_${user.username}`);
     tasks = saved ? JSON.parse(saved) : [];
     updateStats();
@@ -330,15 +331,16 @@ if (adminDashBtn) {
     adminDashBtn.addEventListener('click', () => {
         renderAdminDashboard();
         adminModal.classList.add('active');
+
+        // Link the dashboard internal import button if it exists
+        const dashImport = document.getElementById('admin-import-trigger');
+        if (dashImport) dashImport.onclick = () => document.getElementById('import-file').click();
     });
 }
 
 function renderAdminDashboard() {
     const targetBody = document.getElementById('admin-user-body');
-    if (!targetBody) {
-        console.error('Admin user body not found!');
-        return;
-    }
+    if (!targetBody) return;
 
     let users = [];
     try {
@@ -348,18 +350,18 @@ function renderAdminDashboard() {
             if (!Array.isArray(users)) users = [];
         }
     } catch (e) {
-        console.error('Error parsing users for dashboard:', e);
+        console.error('Error parsing users:', e);
         users = [];
     }
 
     targetBody.innerHTML = '';
 
     if (users.length === 0) {
-        targetBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No users found in database.</td></tr>';
+        targetBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No users found.</td></tr>';
         return;
     }
 
-    // Sort to keep Admin at top
+    // Sort: Admin first
     users.sort((a, b) => {
         const nameA = (a.username || '').toLowerCase();
         const nameB = (b.username || '').toLowerCase();
@@ -368,29 +370,57 @@ function renderAdminDashboard() {
         return 0;
     });
 
-    console.log(`Rendering ${users.length} users in dashboard.`);
-
     users.forEach(user => {
         const tr = document.createElement('tr');
         const isSelf = (user.username || '').toLowerCase() === 'admin_00';
 
+        // Calculate Task Count for this user
+        const userTasksRaw = localStorage.getItem(`tasks_${user.username}`);
+        let taskCount = 0;
+        try {
+            if (userTasksRaw) {
+                const parsed = JSON.parse(userTasksRaw);
+                taskCount = Array.isArray(parsed) ? parsed.length : 0;
+            }
+        } catch (e) { taskCount = 0; }
+
         tr.innerHTML = `
             <td><strong>${user.username || 'Unknown'}</strong> ${isSelf ? '<span class="badge badge-low">Admin</span>' : ''}</td>
             <td>${user.email || 'No email'}</td>
+            <td><span class="badge ${taskCount > 0 ? 'badge-high' : 'badge-low'}">${taskCount} Tasks</span></td>
             <td><span class="credential-field">${user.password || '******'}</span></td>
             <td>
-                ${!isSelf ? `
-                    <button class="btn-icon btn-delete" onclick="deleteSpecificUser('${user.username}')" title="Delete User">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                ` : '<span class="text-muted">Protected</span>'}
+                <div class="action-btns">
+                    ${!isSelf ? `
+                        <button class="btn-icon btn-delete" onclick="deleteSpecificUser('${user.username}')" title="Delete User">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    ` : '<span class="text-muted">Protected</span>'}
+                </div>
             </td>
         `;
         targetBody.appendChild(tr);
     });
+
+    // Reset All Button
+    if (users.length > 1) {
+        const resetRow = document.createElement('tr');
+        resetRow.innerHTML = `
+            <td colspan="5" class="text-center" style="padding: 1.5rem 0;">
+                <button class="btn-danger" style="padding: 0.6rem 1.2rem; border-radius: 8px;" onclick="cleanupAccounts()">
+                    <i class="fas fa-exclamation-triangle"></i> Wipe All User Data
+                </button>
+            </td>
+        `;
+        targetBody.appendChild(resetRow);
+    }
 }
 
 window.deleteSpecificUser = function (username) {
+    if (username.toLowerCase() === 'admin_00') {
+        alert('Action Denied: You cannot delete the system administrator.');
+        return;
+    }
     if (!confirm(`Are you sure you want to delete user "${username}" and all their tasks?`)) return;
 
     // 1. Remove from users list

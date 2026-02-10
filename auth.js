@@ -139,8 +139,10 @@ signupForm.addEventListener('submit', (e) => {
     }
 
     // 2. Username Length Validation
-    if (username.length < 3) {
-        showError('reg', 'Username must be at least 3 characters long.');
+    const usernameLower = username.toLowerCase();
+    const reservedNames = ['admin_00', 'admin', 'administrator', 'system', 'root', 'support'];
+    if (reservedNames.includes(usernameLower)) {
+        showError('reg', 'This username is reserved for system use.');
         return;
     }
 
