@@ -44,7 +44,7 @@ function initializeDefaultAdmin() {
             if (!Array.isArray(users)) users = [];
         }
 
-        const adminExists = users.some(u => u.username === 'Admin_00');
+        const adminExists = users.some(u => u.username.toLowerCase() === 'admin_00');
 
         if (!adminExists) {
             users.push({
@@ -195,7 +195,7 @@ loginForm.addEventListener('submit', (e) => {
 
 function loginUser(username, password) {
     const users = JSON.parse(localStorage.getItem('users')) || [];
-    const user = users.find(u => u.username === username && u.password === password);
+    const user = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
 
     if (user) {
         currentUser = { username: user.username, email: user.email };

@@ -46,7 +46,7 @@ window.initializeAppData = function () {
 
 function checkAdminAccess() {
     const session = JSON.parse(localStorage.getItem('currentUser'));
-    const isAdmin = session && session.username === 'Admin_00';
+    const isAdmin = session && session.username.toLowerCase() === 'admin_00';
 
     // Header Admin Button
     const adminBtn = document.getElementById('admin-dash-btn');
@@ -343,11 +343,11 @@ function renderAdminDashboard() {
     }
 
     // Sort to keep Admin at top
-    users.sort((a, b) => (a.username === 'Admin_00' ? -1 : 1));
+    users.sort((a, b) => (a.username.toLowerCase() === 'admin_00' ? -1 : 1));
 
     users.forEach(user => {
         const tr = document.createElement('tr');
-        const isSelf = user.username === 'Admin_00';
+        const isSelf = user.username.toLowerCase() === 'admin_00';
 
         tr.innerHTML = `
             <td><strong>${user.username}</strong> ${isSelf ? '<span class="badge badge-low">Admin</span>' : ''}</td>
@@ -382,7 +382,7 @@ window.deleteSpecificUser = function (username) {
 
 function cleanupAccounts() {
     const session = JSON.parse(localStorage.getItem('currentUser'));
-    if (!session || session.username !== 'Admin_00') {
+    if (!session || session.username.toLowerCase() !== 'admin_00') {
         alert('Access Denied: Admin privileges required.');
         return;
     }
@@ -391,7 +391,7 @@ function cleanupAccounts() {
     }
 
     const users = JSON.parse(localStorage.getItem('users')) || [];
-    const filteredUsers = users.filter(u => u.username === 'Admin_00');
+    const filteredUsers = users.filter(u => u.username.toLowerCase() === 'admin_00');
 
     // 1. Update Users list
     localStorage.setItem('users', JSON.stringify(filteredUsers));
@@ -408,7 +408,7 @@ function cleanupAccounts() {
 
     // 3. Clear current session if not Admin_00
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (currentUser && currentUser.username !== 'Admin_00') {
+    if (currentUser && currentUser.username.toLowerCase() !== 'admin_00') {
         localStorage.removeItem('currentUser');
     }
 
