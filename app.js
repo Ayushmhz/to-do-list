@@ -342,6 +342,9 @@ function renderAdminDashboard() {
         return;
     }
 
+    // Sort to keep Admin at top
+    users.sort((a, b) => (a.username === 'Admin_00' ? -1 : 1));
+
     users.forEach(user => {
         const tr = document.createElement('tr');
         const isSelf = user.username === 'Admin_00';

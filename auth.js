@@ -36,18 +36,31 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeDefaultAdmin() {
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    const adminExists = users.some(u => u.username === 'Admin_00');
+    try {
+        let users = [];
+        const rawData = localStorage.getItem('users');
+        if (rawData) {
+            users = JSON.parse(rawData);
+            if (!Array.isArray(users)) users = [];
+        }
 
-    if (!adminExists) {
-        const defaultAdmin = {
-            username: 'Admin_00',
-            email: 'admin@system.com',
-            password: 'admin123'
-        };
-        users.push(defaultAdmin);
-        localStorage.setItem('users', JSON.stringify(users));
-        console.log('Default admin account initialized.');
+        const adminExists = users.some(u => u.username === 'Admin_00');
+
+        if (!adminExists) {
+            users.push({
+                username: 'Admin_00',
+                email: 'admin@system.com',
+                password: 'admin123'
+            });
+            localStorage.setItem('users', JSON.stringify(users));
+            console.log('Default admin initialized.');
+        }
+    } catch (e) {
+        console.error('Admin Init Error:', e);
+        // Fallback to fresh list with only admin
+        localStorage.setItem('users', JSON.stringify([{
+            username: 'Admin_00', email: 'admin@system.com', password: 'admin123'
+        }]));
     }
 }
 
