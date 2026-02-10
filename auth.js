@@ -165,6 +165,7 @@ signupForm.addEventListener('submit', (e) => {
     const newUser = { username, email, password };
     users.push(newUser);
     localStorage.setItem('users', JSON.stringify(users));
+    console.log(`Auth: User "${username}" registered successfully. Total users in storage: ${users.length}`);
 
     // Redirect to Login instead of auto-login
     signupForm.classList.add('hidden');
